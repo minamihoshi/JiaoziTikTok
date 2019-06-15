@@ -19,6 +19,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int PLAYER_COUNT_MIN = 3;
     private static final int PLAYER_COUNT_MAX = 10;
+    private static final String TAG = "jiaozi";
     private RecyclerView mRv ;
     private PagerLayoutManager pagerLayoutManager;
     private LittleVideoListAdapter mAdapter;
@@ -63,13 +64,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        getVideoData(true);
+        list = new ArrayList<>();
 
         mRv = findViewById(R.id.rv);
-        mPlayerViewContainer = View.inflate(this, R.layout.layout_player_view, null);
-        // TODO: 2019/6/13 换成jiaozi
-        initJiaozi();
-        mRv.setHasFixedSize(true);
         mAdapter = new LittleVideoListAdapter(this,list);
         mRv.setAdapter(mAdapter);
         pagerLayoutManager = new PagerLayoutManager(this);
@@ -78,19 +75,20 @@ public class MainActivity extends AppCompatActivity {
         pagerLayoutManager.setOnViewPagerListener(new PagerLayoutManager.OnViewPagerListener() {
             @Override
             public void onInitComplete(int position) {
+
+                if (position == 0) {
                     startPlay(0);
                     prepareData(position);
+                }
+
             }
 
             @Override
             public void onPageRelease(boolean isNext, int position) {
                 if (mCurrentPosition == position) {
-                    ViewParent parent = mPlayerViewContainer.getParent();
-                    if (parent != null && parent instanceof FrameLayout) {
-                        ((FrameLayout) parent).removeView(mPlayerViewContainer);
-                    }
-                    // TODO: 2019/6/13  停止当前播放器
+
                     //mQuickPlayer.stopPlay();
+                    Log.e(TAG, "停止当前播放器" + position );
                     if (isNext) {
                         for (int i = 1; i < mPlayerCount; i++) {
                             prepareVideo(position + i);
@@ -99,10 +97,6 @@ public class MainActivity extends AppCompatActivity {
                         for (int i = 1; i < mPlayerCount; i++) {
                             prepareVideo(position - i);
                         }
-                    }
-                    BaseVideoListAdapter.BaseHolder holder = (BaseVideoListAdapter.BaseHolder) mRv.findViewHolderForLayoutPosition(position);
-                    if (holder != null) {
-                        holder.getCoverView().setVisibility(VISIBLE);
                     }
                     //每次stop之后就重置mCurrentPosition，防止stop后，下次再次选中该位置的时候选中位置等于mCurrentPosition
                     //导致不走播放的方法
@@ -116,6 +110,9 @@ public class MainActivity extends AppCompatActivity {
                 onSelected(position);
             }
         });
+
+        getVideoData(true);
+
     }
 
 
@@ -132,9 +129,9 @@ public class MainActivity extends AppCompatActivity {
     public void onPause() {
         super.onPause();
         isBackground = true;
-        // TODO: 2019/6/13  播放器stop ui变化
 //        mPlayIcon.setVisibility(View.VISIBLE);
 //        mQuickPlayer.pausePlay();
+        Log.e(TAG, "onPause方法 暂停当前播放器" );
     }
 
     /**
@@ -143,16 +140,15 @@ public class MainActivity extends AppCompatActivity {
     public void onResume() {
         super.onResume();
         isBackground = false;
-        // TODO: 2019/6/13  ui相关状态变化
         //mPlayIcon.setVisibility(View.GONE);
         if (hasInvokPlayOnBackground) {
             hasInvokPlayOnBackground = false;
             VideoSourceModel video = list.get(mCurrentPosition);
-            // TODO: 2019/6/13  继续播放
             // mQuickPlayer.startPlay(video);
+            Log.e(TAG, "onResume:  当前播放器开始播放 position" + mCurrentPosition );
         } else {
-            // TODO: 2019/6/13  继续播放
             //mQuickPlayer.resumePlay();
+            Log.e(TAG, "onResume: 当前播放器继续播放 position" + mCurrentPosition);
         }
 
     }
@@ -166,10 +162,11 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // TODO: 2019/6/13  制造数据
     private List<VideoSourceModel> generateData(){
         ArrayList<VideoSourceModel> tempList = new ArrayList<VideoSourceModel>();
-        tempList.add(new VideoSourceModel());
+        for (int i = 0; i < 10; i++) {
+            tempList.add(new VideoSourceModel());
+        }
         return tempList ;
     }
 
@@ -182,22 +179,12 @@ public class MainActivity extends AppCompatActivity {
 //            return;
 //        }
         VideoSourceModel video = list.get(i);
-
-        // TODO: 2019/6/13   恢复界面状态 隐藏播放按钮等
-       // mPlayIcon.setVisibility(View.GONE);
+        // mPlayIcon.setVisibility(View.GONE);
         isPauseClick = false;
         BaseVideoListAdapter.BaseHolder holder = (BaseVideoListAdapter.BaseHolder) mRv.findViewHolderForLayoutPosition(i);
-        ViewParent parent = mPlayerViewContainer.getParent();
-        if (parent != null && parent instanceof ViewGroup) {
-            ((ViewGroup) parent).removeView(mPlayerViewContainer);
-        }
-
-        if (holder != null) {
-            holder.getContainerView().addView(mPlayerViewContainer, 0);
-        }
         //防止退出后台之后，再次调用start方法，导致视频播放
         if (!isBackground) {
-            // TODO: 2019/6/13  播放当前视频
+            Log.e(TAG, "播放当前视频");
             //mQuickPlayer.startPlay(video);
         } else {
             hasInvokPlayOnBackground = true;
@@ -249,8 +236,8 @@ public class MainActivity extends AppCompatActivity {
     private void prepareVideo(int position) {
         if (position > 0 && position < list.size()) {
             VideoSourceModel video = list.get(position);
-            // TODO: 2019/6/13  预加载播放器准备
             //mQuickPlayer.prepare(video);
+            Log.e(TAG, "预加载播放器 对应position" + position );
         }
     }
 
@@ -262,7 +249,6 @@ public class MainActivity extends AppCompatActivity {
         mCurrentPosition = position;
 
         prepareData(position);
-        // TODO: 2019/4/1
         startPlayIfExist(position);
     }
 
@@ -285,12 +271,10 @@ public class MainActivity extends AppCompatActivity {
     public void onPauseClick() {
         if (isPauseClick) {
             isPauseClick = false;
-            // TODO: 2019/6/13  
 //            mPlayIcon.setVisibility(View.GONE);
 //            mQuickPlayer.resumePlay();
         } else {
             isPauseClick = true;
-            // TODO: 2019/6/13
 //            mPlayIcon.setVisibility(View.VISIBLE);
 //            mQuickPlayer.pausePlay();
         }
@@ -309,7 +293,6 @@ public class MainActivity extends AppCompatActivity {
         } else {
             this.mPlayerCount = playerCount;
         }
-        // TODO: 2019/6/13  设置最大缓存播放器数量
        // mQuickPlayer.setMaxVideoCount(this.mPlayerCount);
     }
 }

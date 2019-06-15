@@ -66,32 +66,30 @@ public class LittleVideoListAdapter extends BaseVideoListAdapter<LittleVideoList
 //        requestOptions.fitCenter();
 //        requestOptions.placeholder(R.drawable.image_video_bg);
        // Glide.with(context).load(videoModel.coverUrl).apply(requestOptions).into(myHolder.ivCover);
-
+        myHolder.tv.setText(String.valueOf(position));
 
     }
 
     public final class MyHolder extends BaseVideoListAdapter.BaseHolder {
 
-        private ImageView ivCover, ivShare, ivLike, ivFocus;
-        private TextView tvNick, tvLike, tvDescription, tvInvite ,tvFaceTime;
-        public FrameLayout playerView;
-        private ViewGroup mRootView;
-        private ConstraintLayout consInvite ,consInvite2,consFaceTime;
+
+
+        private TextView tv;
 
         MyHolder(@NonNull View itemView) {
             super(itemView);
-            ivCover = itemView.findViewById(R.id.iv_cover);
 
+            tv = itemView.findViewById(R.id.tv);
         }
 
         @Override
         public ImageView getCoverView() {
-            return ivCover;
+            return null;
         }
 
         @Override
         public ViewGroup getContainerView() {
-            return playerView;
+            return null;
         }
 
     }
